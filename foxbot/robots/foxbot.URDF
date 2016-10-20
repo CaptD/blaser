@@ -1,0 +1,361 @@
+<robot
+  name="foxbot">
+  <link
+    name="foxbot_base">
+    <inertial>
+      <origin
+        xyz="-0.0163235516334413 -5.42801898792411E-06 0.0819869649853121"
+        rpy="0 0 0" />
+      <mass
+        value="4.59032211444505" />
+      <inertia
+        ixx="0.018208899058353"
+        ixy="-3.46354630806397E-06"
+        ixz="0.00156935061580264"
+        iyy="0.0279697504596635"
+        iyz="1.86659772370826E-06"
+        izz="0.0249892791751756" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="Link_1">
+    <inertial>
+      <origin
+        xyz="-0.0135415952378267 0.0871107115024519 -0.0138760556466131"
+        rpy="0 0 0" />
+      <mass
+        value="4.21299238875099" />
+      <inertia
+        ixx="0.0153288387858665"
+        ixy="-0.00377985132183255"
+        ixz="0.000458558007165404"
+        iyy="0.0199480886004766"
+        iyz="-0.00132613146731574"
+        izz="0.0225508015576744" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="J1"
+    type="continuous">
+    <origin
+      xyz="0 0 0.183"
+      rpy="1.5707963267949 0 -1.5707963267949" />
+    <parent
+      link="foxbot_base" />
+    <child
+      link="Link_1" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="Link_2">
+    <inertial>
+      <origin
+        xyz="-0.00115604958667437 0.124452341234557 0.0373970992666749"
+        rpy="0 0 0" />
+      <mass
+        value="2.54434009750127" />
+      <inertia
+        ixx="0.0348704197529745"
+        ixy="-0.000279802590578281"
+        ixz="-3.57637755347594E-06"
+        iyy="0.00316769897365321"
+        iyz="0.000190319862089532"
+        izz="0.0361136411830753" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="J2"
+    type="continuous">
+    <origin
+      xyz="-0.121 0.117 -0.02"
+      rpy="1.5707963267949 -1.56133343806214 -1.5707963267949" />
+    <parent
+      link="Link_1" />
+    <child
+      link="Link_2" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="Link_3">
+    <inertial>
+      <origin
+        xyz="0.00116991210100781 0.00389190349337754 0.106586693184957"
+        rpy="0 0 0" />
+      <mass
+        value="3.34548958121899" />
+      <inertia
+        ixx="0.018545675119802"
+        ixy="-4.61762895361652E-06"
+        ixz="1.46042021831776E-06"
+        iyy="0.0107615345939171"
+        iyz="-6.17725743652315E-05"
+        izz="0.0132478283604091" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="J3"
+    type="continuous">
+    <origin
+      xyz="-0.00130457385796967 0.280000773062928 0"
+      rpy="3.14159265358979 0 -3.13212976485703" />
+    <parent
+      link="Link_2" />
+    <child
+      link="Link_3" />
+    <axis
+      xyz="0 0 -1" />
+  </joint>
+  <link
+    name="Link_4">
+    <inertial>
+      <origin
+        xyz="-2.31904881879963E-05 -0.0054666561200761 0.0969057561289095"
+        rpy="0 0 0" />
+      <mass
+        value="1.82726244296819" />
+      <inertia
+        ixx="0.00935961638941899"
+        ixy="-2.10363662980741E-07"
+        ixz="3.94764663004733E-06"
+        iyy="0.00660395012030122"
+        iyz="-0.000245281845746558"
+        izz="0.00469464108619674" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="J4"
+    type="continuous">
+    <origin
+      xyz="0.00134506116833966 0.125999418501958 0.121"
+      rpy="-1.5707963267949 0 0" />
+    <parent
+      link="Link_3" />
+    <child
+      link="Link_4" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="Link_5">
+    <inertial>
+      <origin
+        xyz="1.21099561711802E-07 0.0103060430938787 0.0319171895178193"
+        rpy="0 0 0" />
+      <mass
+        value="0.522662129489494" />
+      <inertia
+        ixx="0.000670021741090753"
+        ixy="1.34979003623211E-10"
+        ixz="-4.96253127204476E-09"
+        iyy="0.000421836901584165"
+        iyz="5.21977873367666E-07"
+        izz="0.000777554079600959" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="J5"
+    type="continuous">
+    <origin
+      xyz="0 0.032 0.174"
+      rpy="1.5707963267949 0 0" />
+    <parent
+      link="Link_4" />
+    <child
+      link="Link_5" />
+    <axis
+      xyz="0 0 -1" />
+  </joint>
+  <link
+    name="Link_6">
+    <inertial>
+      <origin
+        xyz="2.4980018054066E-16 -0.000104998486852526 -0.00961770832123632"
+        rpy="0 0 1.57" />
+      <mass
+        value="0.0206169988992599" />
+      <inertia
+        ixx="2.64501460179715E-06"
+        ixy="5.34231091435883E-22"
+        ixz="-2.23575627816483E-20"
+        iyy="2.67933676824264E-06"
+        iyz="-1.32433316496744E-08"
+        izz="4.26669735509732E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 1.57" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_6.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.796078431372549 0.823529411764706 0.937254901960784 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 1.57" />
+      <geometry>
+        <mesh
+          filename="package://foxbot/meshes/Link_6.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="J6"
+    type="continuous">
+    <origin
+      xyz="0 0.08 0.032"
+      rpy="-1.57 0 0" />
+    <parent
+      link="Link_5" />
+    <child
+      link="Link_6" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+</robot>

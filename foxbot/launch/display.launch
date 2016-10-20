@@ -1,0 +1,35 @@
+<launch>
+  <!--node pkg="tf" type="static_transform_publisher" name="screw_plate_to_base" args="0 0 0 0 0 0 foxbot_base base_link 100" /-->
+  <remap from="joint_states" to="robot_JointsLog"/>
+  <arg
+    name="model" />
+  <arg
+    name="gui"
+    default="True" />
+  <param
+    name="robot_description"
+    textfile="$(find foxbot)/robots/foxbot.URDF" />
+  <param
+    name="screwplate_description"
+    textfile="$(find workspace)/robots/screw_plate_alum_v2.URDF" />
+  <param
+    name="screwdriver_description"
+    textfile="$(find screwdriver)/robots/screwdriver.URDF" />
+  <param
+    name="use_gui"
+    value="$(arg gui)" />
+  <!-- node
+    name="joint_state_publisher"
+    pkg="joint_state_publisher"
+    type="joint_state_publisher">
+  </node -->
+  <node
+    name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="state_publisher" />
+  <node
+    name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find foxbot)/urdf.rviz" />
+</launch>

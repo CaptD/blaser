@@ -1,0 +1,5 @@
+<launch>
+  <group ns="foxbot">
+    <node name="foxbot_node" pkg="foxbot" type="robot_node.py" output="screen"/>
+  </group>
+</launch>

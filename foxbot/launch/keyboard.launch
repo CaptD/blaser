@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="foxbot" type="keyboard_control.py" name="keyboard_control_node" output="screen" />
+
+</launch>

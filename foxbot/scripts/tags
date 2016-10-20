@@ -1,0 +1,70 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+DEFAULT_FIG	robot_node.py	/^DEFAULT_FIG = 0$/;"	v
+DelayedKeyboardInterrupt	robot_node.py	/^class DelayedKeyboardInterrupt(object):$/;"	c	inherits:object
+FORMAT_STRING	robot_node.py	/^FORMAT_STRING = '<hhddddddhddddddh'$/;"	v
+Foxbot	robot_node.py	/^class Foxbot():$/;"	c	inherits:
+ROBOT_APPROACH	robot_node.py	/^ROBOT_APPROACH = 8$/;"	v
+ROBOT_GET_CARTESIAN	robot_node.py	/^ROBOT_GET_CARTESIAN = 3$/;"	v
+ROBOT_GET_FK	robot_node.py	/^ROBOT_GET_FK = 4$/;"	v
+ROBOT_GET_IK	robot_node.py	/^ROBOT_GET_IK = 5$/;"	v
+ROBOT_GET_JOINTS	robot_node.py	/^ROBOT_GET_JOINTS = 6 $/;"	v
+ROBOT_GET_STATE	robot_node.py	/^ROBOT_GET_STATE = 2$/;"	v
+ROBOT_PING	robot_node.py	/^ROBOT_PING = 7$/;"	v
+ROBOT_SET_CARTESIAN	robot_node.py	/^ROBOT_SET_CARTESIAN = 9$/;"	v
+ROBOT_SET_CARTESIAN_J	robot_node.py	/^ROBOT_SET_CARTESIAN_J = 10$/;"	v
+ROBOT_SET_COMM	robot_node.py	/^ROBOT_SET_COMM = 11$/;"	v
+ROBOT_SET_DEFAULT	robot_node.py	/^ROBOT_SET_DEFAULT = 12$/;"	v
+ROBOT_SET_JOINTS	robot_node.py	/^ROBOT_SET_JOINTS = 13$/;"	v
+ROBOT_SET_SPEED	robot_node.py	/^ROBOT_SET_SPEED = 14$/;"	v
+ROBOT_SET_TOOL	robot_node.py	/^ROBOT_SET_TOOL = 15$/;"	v
+ROBOT_SET_TRACK_DISTANCE	robot_node.py	/^ROBOT_SET_TRACK_DISTANCE = 16$/;"	v
+ROBOT_SET_VACUUM	robot_node.py	/^ROBOT_SET_VACUUM = 17$/;"	v
+ROBOT_SET_WORK_OBJ	robot_node.py	/^ROBOT_SET_WORK_OBJ = 19$/;"	v
+ROBOT_SET_ZONE	robot_node.py	/^ROBOT_SET_ZONE = 18$/;"	v
+ROBOT_SPL_CMD	robot_node.py	/^ROBOT_SPL_CMD = 20$/;"	v
+__enter__	robot_node.py	/^    def __enter__(self):$/;"	m	class:DelayedKeyboardInterrupt	file:	access:private
+__exit__	robot_node.py	/^    def __exit__(self, type, value, traceback):$/;"	m	class:DelayedKeyboardInterrupt	file:	access:private
+__init__	robot_node.py	/^    def __init__(self):$/;"	m	class:Foxbot	access:public
+advertise	robot_node.py	/^    def advertise(self):$/;"	f	function:Foxbot.unpack	access:public
+broadcast	robot_node.py	/^    broadcast = tf.TransformBroadcaster()$/;"	v	class:Foxbot
+connect	robot_node.py	/^    def connect(self):$/;"	m	class:Foxbot	access:public
+connectionSleep	robot_node.py	/^    connectionSleep = 1$/;"	v	class:Foxbot
+destinationInfo	robot_node.py	/^    destinationInfo = ('192.168.1.97',5000)$/;"	v	class:Foxbot
+disconnect	robot_node.py	/^    def disconnect(self):$/;"	m	class:Foxbot	access:public
+handle_robot_approach	robot_node.py	/^    def handle_robot_approach(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_get_cartesian	robot_node.py	/^    def handle_robot_get_cartesian(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_get_fk	robot_node.py	/^    def handle_robot_get_fk(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_get_ik	robot_node.py	/^    def handle_robot_get_ik(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_get_joints	robot_node.py	/^    def handle_robot_get_joints(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_get_state	robot_node.py	/^    def handle_robot_get_state(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_ping	robot_node.py	/^    def handle_robot_ping(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_cartesian	robot_node.py	/^    def handle_robot_set_cartesian(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_cartesianJ	robot_node.py	/^    def handle_robot_set_cartesianJ(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_comm	robot_node.py	/^    def handle_robot_set_comm(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_defaults	robot_node.py	/^    def handle_robot_set_defaults(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_joints	robot_node.py	/^    def handle_robot_set_joints(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_speed	robot_node.py	/^    def handle_robot_set_speed(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_tool	robot_node.py	/^    def handle_robot_set_tool(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_vacuum	robot_node.py	/^    def handle_robot_set_vacuum(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_work_object	robot_node.py	/^    def handle_robot_set_work_object(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_set_zone	robot_node.py	/^    def handle_robot_set_zone(self,req):$/;"	m	class:Foxbot	access:public
+handle_robot_special_command	robot_node.py	/^    def handle_robot_special_command(self,req):$/;"	m	class:Foxbot	access:public
+handler	robot_node.py	/^    def handler(self, signal, frame):$/;"	m	class:DelayedKeyboardInterrupt	access:public
+logger	robot_node.py	/^    def logger(self):$/;"	m	class:Foxbot	access:public
+loggerLock	robot_node.py	/^    loggerLock = threading.Lock()$/;"	v	class:Foxbot
+loggerSocket	robot_node.py	/^    loggerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)$/;"	v	class:Foxbot
+main	robot_node.py	/^def main():$/;"	f	access:public
+pack	robot_node.py	/^    def pack(self,data)$/;"	m	class:Foxbot	access:public
+recv	robot_node.py	/^    def recv(self,hSocket,hLock)$/;"	m	class:Foxbot	access:public
+sendrecv	robot_node.py	/^    def sendrecv(self, hSocket, hLock, data)$/;"	m	class:Foxbot	access:public
+serviceLock	robot_node.py	/^    serviceLock = threading.Lock()$/;"	v	class:Foxbot
+serviceSocket	robot_node.py	/^    serviceSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)$/;"	v	class:Foxbot
+toolObject	robot_node.py	/^    toolObject = PoseStamped(0,0,0,np.array([0,0,0,1]))$/;"	v	class:Foxbot
+transformLock	robot_node.py	/^    transformLock = threading.Lock()$/;"	v	class:Foxbot
+unpack	robot_node.py	/^   def unpack(self,msg)$/;"	m	class:Foxbot	access:public
+workObject	robot_node.py	/^    workObject = PoseStamped(0,0,0,np.array([0,0,0,1]))$/;"	v	class:Foxbot
