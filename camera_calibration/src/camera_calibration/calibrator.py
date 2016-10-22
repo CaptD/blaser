@@ -221,7 +221,7 @@ class Calibrator(object):
         self.pattern = pattern
         self.br = cv_bridge.CvBridge()
 
-        # self.db is list of (parameters, image) samples for use in calibration. parameters has form
+        # self.db is list of (parameters, image, tf) samples for use in calibration. parameters has form
         # (X, Y, size, skew) all normalized to [0,1], to keep track of what sort of samples we've taken
         # and ensure enough variety.
         self.db = []
@@ -333,10 +333,8 @@ class Calibrator(object):
     def get_corners(self, img, refine = True):
         """
         Use cvFindChessboardCorners to find corners of chessboard in image.
-
         Check all boards. Return corners for first chessboard that it detects
         if given multiple size chessboards.
-
         Returns (ok, corners, board)
         """
 
@@ -353,11 +351,9 @@ class Calibrator(object):
         """
         Downsample the input image to approximately VGA resolution and detect the
         calibration target corners in the full-size image.
-
         Combines these apparently orthogonal duties as an optimization. Checkerboard
         detection is too expensive on large images, so it's better to do detection on
         the smaller display image and scale the corners back up to the correct size.
-
         Returns (scrib, corners, downsampled_corners, board, (x_scale, y_scale)).
         """
         # Scale the input image down to ~VGA size
@@ -502,7 +498,6 @@ class Calibrator(object):
 def image_from_archive(archive, name):
     """
     Load image PGM file from tar archive. 
-
     Used for tarfile loading and unit test.
     """
     member = archive.getmember(name)
@@ -537,7 +532,6 @@ class StereoDrawable(ImageDrawable):
 class MonoCalibrator(Calibrator):
     """
     Calibration class for monocular cameras::
-
         images = [cv2.imread("mono%d.png") for i in range(8)]
         mc = MonoCalibrator()
         mc.cal(images)
@@ -563,9 +557,7 @@ class MonoCalibrator(Calibrator):
         """
         :param images: source images containing chessboards
         :type images: list of :class:`cvMat`
-
         Find chessboards in all images.
-
         Return [ (corners, ChessboardInfo) ]
         """
         self.size = (images[0].shape[1], images[0].shape[0])
@@ -580,7 +572,6 @@ class MonoCalibrator(Calibrator):
         """
         :param good: Good corner positions and boards 
         :type good: [(corners, ChessboardInfo)]
-
         
         """
         boards = [ b for (_, b) in good ]
@@ -629,7 +620,6 @@ class MonoCalibrator(Calibrator):
         """
         :param src: source image
         :type src: :class:`cvMat`
-
         Apply the post-calibration undistortion to the source image
         """
         return cv2.remap(src, self.mapx, self.mapy, cv2.INTER_LINEAR)
@@ -638,7 +628,6 @@ class MonoCalibrator(Calibrator):
         """
         :param src: N source pixel points (u,v) as an Nx2 matrix
         :type src: :class:`cvMat`
-
         Apply the post-calibration undistortion to the source points
         """
 
@@ -713,10 +702,10 @@ class MonoCalibrator(Calibrator):
         """
         Detects the calibration target and, if found and provides enough new information,
         adds it to the sample database.
-
         Returns a MonoDrawable message with the display image and progress info.
         """
-        gray = self.mkgray(msg)
+        #print msg[1]
+        gray = self.mkgray(msg[0])
         linear_error = -1
 
         # Get display-image-to-be (scrib) and detection of the calibration target
@@ -752,10 +741,9 @@ class MonoCalibrator(Calibrator):
                 # Add sample to database only if it's sufficiently different from any previous sample.
                 params = self.get_parameters(corners, board, (gray.shape[1], gray.shape[0]))
                 if self.is_good_sample(params):
-                    self.db.append((params, gray))
+                    self.db.append((params, gray,msg[1]))
                     self.good_corners.append((corners, board))
-                    print(("*** Added sample %d, p_x = %.3f, p_y = %.3f, p_size = %.3f, skew = %.3f" % tuple([len(self.db)] + params)))
-                    print hahahha
+                    print(("*** Added sample %d, p_x = %.3f, p_y = %.3f, p_size = %.3f, skew = %.3f, position = [%.3f, %.3f, %.3f]" % tuple([len(self.db)] + params + list(msg[1]))))
 
         rv = MonoDrawable()
         rv.scrib = scrib
@@ -807,7 +795,6 @@ class MonoCalibrator(Calibrator):
 class StereoCalibrator(Calibrator):
     """
     Calibration class for stereo cameras::
-
         limages = [cv2.imread("left%d.png") for i in range(8)]
         rimages = [cv2.imread("right%d.png") for i in range(8)]
         sc = StereoCalibrator()
@@ -833,7 +820,6 @@ class StereoCalibrator(Calibrator):
         :type limages: list of :class:`cvMat`
         :param rimages: source right images containing chessboards
         :type rimages: list of :class:`cvMat`
-
         Find chessboards in images, and runs the OpenCV calibration solver.
         """
         goodcorners = self.collect_corners(limages, rimages)

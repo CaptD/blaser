@@ -58,7 +58,5 @@
     <param name="flip_upd" type="bool" value="False" />
     <param name="flip_lr"  type="bool" value="False" />
   </node>
-  <node pkg="ueye_cam" type="blaser_blue.py" name="blaser_blue" output="screen" />
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ueye_cam)/blaser_blue.rviz"/>
-  <node name="tf_bc" pkg="ueye_cam" type="tfbc"/>
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ueye_cam)/calib_blue.rviz"/>
 </launch>

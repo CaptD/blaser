@@ -47,11 +47,9 @@ import time
 import cv2
 import numpy
 
-from camera_calibration.calibrator import MonoCalibrator, StereoCalibrator, ChessboardInfo, Patterns
+from camera_calibration.calibrator import MonoCalibrator, ChessboardInfo, Patterns
 from std_msgs.msg import String
 from std_srvs.srv import Empty
-from tf import TransformListener
-import tf.transformations as transform
 
 class DisplayThread(threading.Thread):
     """
@@ -94,7 +92,6 @@ class ConsumerThread(threading.Thread):
                 time.sleep(0.1)
             self.function(self.queue[0])
 
-
 class CalibrationNode:
     def __init__(self, boards, service_check = True, synchronizer = message_filters.TimeSynchronizer, flags = 0,
                  pattern=Patterns.Chessboard, camera_name='', checkerboard_flags = 0):
@@ -117,11 +114,9 @@ class CalibrationNode:
         self._checkerboard_flags = checkerboard_flags
         self._pattern = pattern
         self._camera_name = camera_name
-        self.tf = TransformListener()
         lsub = message_filters.Subscriber('left', sensor_msgs.msg.Image)
         rsub = message_filters.Subscriber('right', sensor_msgs.msg.Image)
         ts = synchronizer([lsub, rsub], 4)
-        ts.registerCallback(self.queue_stereo)
 
         msub = message_filters.Subscriber('image', sensor_msgs.msg.Image)
         msub.registerCallback(self.queue_monocular)
@@ -134,31 +129,18 @@ class CalibrationNode:
                                                                 sensor_msgs.srv.SetCameraInfo)
 
         self.q_mono = deque([], 1)
-        self.q_stereo = deque([], 1)
 
         self.c = None
 
         mth = ConsumerThread(self.q_mono, self.handle_monocular)
         mth.setDaemon(True)
         mth.start()
-
-        sth = ConsumerThread(self.q_stereo, self.handle_stereo)
-        sth.setDaemon(True)
-        sth.start()
         
-    def redraw_stereo(self, *args):
-        pass
     def redraw_monocular(self, *args):
         pass
 
     def queue_monocular(self, msg):
-        if self.tf.frameExists("/foxbot_base") and self.tf.frameExists("/foxbot_tool"):
-            t = self.tf.getLatestCommonTime("/foxbot_base", "/foxbot_tool")
-            position, quaternion = self.tf.lookupTransform("/foxbot_base", "/foxbot_tool", t)
-        self.q_mono.append((msg,position,quaternion))
-
-    def queue_stereo(self, lmsg, rmsg):
-        self.q_stereo.append((lmsg, rmsg))
+        self.q_mono.append(msg)
 
     def handle_monocular(self, msg):
         if self.c == None:
@@ -173,20 +155,6 @@ class CalibrationNode:
         drawable = self.c.handle_msg(msg)
         self.displaywidth = drawable.scrib.shape[1]
         self.redraw_monocular(drawable)
-
-    def handle_stereo(self, msg):
-        if self.c == None:
-            if self._camera_name:
-                self.c = StereoCalibrator(self._boards, self._calib_flags, self._pattern, name=self._camera_name,
-                                          checkerboard_flags=self._checkerboard_flags)
-            else:
-                self.c = StereoCalibrator(self._boards, self._calib_flags, self._pattern,
-                                          checkerboard_flags=self._checkerboard_flags)
-
-        drawable = self.c.handle_msg(msg)
-        self.displaywidth = drawable.lscrib.shape[1] + drawable.rscrib.shape[1]
-        self.redraw_stereo(drawable)
-            
  
     def check_set_camera_info(self, response):
         if response.success:
@@ -322,46 +290,66 @@ class OpenCVCalibrationNode(CalibrationNode):
 
         self.queue_display.append(display)
 
-    def redraw_stereo(self, drawable):
-        height = drawable.lscrib.shape[0]
-        width = drawable.lscrib.shape[1]
+def main():
 
-        display = numpy.zeros((max(480, height), 2 * width + 100, 3), dtype=numpy.uint8)
-        display[0:height, 0:width,:] = drawable.lscrib
-        display[0:height, width:2*width,:] = drawable.rscrib
-        display[0:height, 2*width:2*width+100,:].fill(255)
+    from optparse import OptionParser, OptionGroup
+    parser = OptionParser("%prog --size SIZE1 --square SQUARE1 [ --size SIZE2 --square SQUARE2 ]",
+                          description=None)
+    parser.add_option("-c", "--camera_name",
+                     type="string", default='narrow_stereo',
+                     help="name of the camera to appear in the calibration file")
+    group = OptionGroup(parser, "Chessboard Options",
+                        "You must specify one or more chessboards as pairs of --size and --square options.")
+    group.add_option("-p", "--pattern",
+                     type="string", default="chessboard",
+                     help="calibration pattern to detect - 'chessboard', 'circles', 'acircles'")
+    group.add_option("-s", "--size",
+                     action="append", default=["9x6"],
+                     help="chessboard size as NxM, counting interior corners (e.g. a standard chessboard is 7x7)")
+    group.add_option("-q", "--square",
+                     action="append", default=["0.00408"],
+                     help="chessboard square size in meters")
+    parser.add_option_group(group)
+    group = OptionGroup(parser, "ROS Communication Options")
+    group.add_option("--approximate",
+                     type="float", default=0.0,
+                     help="allow specified slop (in seconds) when pairing images from unsynchronized stereo cameras")
+    group.add_option("--no-service-check",
+                     action="store_false", dest="service_check", default=True,
+                     help="disable check for set_camera_info services at startup")
+    parser.add_option_group(group)
+    group = OptionGroup(parser, "Calibration Optimizer Options")
+    group.add_option("--fix-principal-point",
+                     action="store_true", default=False,
+                     help="fix the principal point at the image center")
+    group.add_option("--fix-aspect-ratio",
+                     action="store_true", default=False,
+                     help="enforce focal lengths (fx, fy) are equal")
+    group.add_option("--zero-tangent-dist",
+                     action="store_true", default=False,
+                     help="set tangential distortion coefficients (p1, p2) to zero")
+    group.add_option("-k", "--k-coefficients",
+                     type="int", default=0, metavar="NUM_COEFFS",
+                     help="number of radial distortion coefficients to use (up to 6, default %default)")
+    group.add_option("--disable_calib_cb_fast_check", action='store_true', default=False,
+                     help="uses the CALIB_CB_FAST_CHECK flag for findChessboardCorners")
+    parser.add_option_group(group)
+    options, args = parser.parse_args()
 
-        self.buttons(display)
+    if len(options.size) != len(options.square):
+        parser.error("Number of size and square inputs must be the same!")
+ 
+    if not options.square:
+        options.square.append("0.108")
+        options.size.append("8x6")
 
-        if not self.c.calibrated:
-            if drawable.params:
-                for i, (label, lo, hi, progress) in enumerate(drawable.params):
-                    (w,_) = self.getTextSize(label)
-                    self.putText(display, label, (2 * width + (100 - w) / 2, self.y(i)))
-                    color = (0,255,0)
-                    if progress < 1.0:
-                        color = (0, int(progress*255.), 255)
-                    cv2.line(display,
-                            (int(2 * width + lo * 100), self.y(i) + 20),
-                            (int(2 * width + hi * 100), self.y(i) + 20),
-                            color, 4)
-
-        else:
-            self.putText(display, "epi.", (2 * width, self.y(0)))
-            if drawable.epierror == -1:
-                msg = "?"
-            else:
-                msg = "%.2f" % drawable.epierror
-            self.putText(display, msg, (2 * width, self.y(1)))
-            # TODO dim is never set anywhere. Supposed to be observed chessboard size?
-            if drawable.dim != -1:
-                self.putText(display, "dim", (2 * width, self.y(2)))
-                self.putText(display, "%.3f" % drawable.dim, (2 * width, self.y(3)))
-
-        self.queue_display.append(display)
+    boards = []
+    for (sz, sq) in zip(options.size, options.square):
+        size = tuple([int(c) for c in sz.split('x')])
+        boards.append(ChessboardInfo(size[0], size[1], float(sq)))
+        print boards
 
 
-def main():    
     square = 0.00408 # in meter
     width = 9
     height = 6
@@ -375,10 +363,9 @@ def main():
     service_check = '/camera_1/image_raw'
     camera_name = '/camera_1'
 
-
     boards = []
-    
-    boards.append(ChessboardInfo(width, height, square))
+    #boards.append()
+    print ChessboardInfo(width, height, square)
 
     if approximate == 0.0:
         sync = message_filters.TimeSynchronizer
@@ -410,6 +397,9 @@ def main():
         calib_flags |= cv2.CALIB_FIX_K1
 
     pattern = Patterns.Chessboard
+    rospy.logwarn("debug")
+    print pattern
+
     if pattern == 'circles':
         pattern = Patterns.Circles
     elif pattern == 'acircles':
@@ -423,8 +413,7 @@ def main():
         checkerboard_flags = cv2.CALIB_CB_FAST_CHECK
 
     rospy.init_node('cameracalibrator')
-    node = OpenCVCalibrationNode(boards, service_check, sync, calib_flags, pattern, camera_name,
-                                 checkerboard_flags=checkerboard_flags)
+    node = OpenCVCalibrationNode(boards, service_check, sync, calib_flags, pattern, camera_name, checkerboard_flags=checkerboard_flags)
     rospy.spin()
 
 if __name__ == "__main__":
