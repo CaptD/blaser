@@ -309,8 +309,8 @@ class Calibrator(object):
         progress = [min((hi - lo) / r, 1.0) for (lo, hi, r) in zip(min_params, max_params, self.param_ranges)]
         # If we have lots of samples, allow calibration even if not all parameters are green
         # TODO Awkward that we update self.goodenough instead of returning it
-        self.goodenough = (len(self.db) >= 40) or all([p == 1.0 for p in progress])
-
+        #self.goodenough = (len(self.db) >= 40) or all([p == 1.0 for p in progress])
+        self.goodenough = (len(self.db) >= 2) or all([p == 1.0 for p in progress])
         return list(zip(self._param_names, min_params, max_params, progress))
 
     def mk_object_points(self, boards, use_board_size = False):
@@ -587,11 +587,24 @@ class MonoCalibrator(Calibrator):
         # If FIX_ASPECT_RATIO flag set, enforce focal lengths have 1/1 ratio
         self.intrinsics[0,0] = 1.0
         self.intrinsics[1,1] = 1.0
+        #print 'size'
+        #print len(opts)
+        self.rvecs = numpy.zeros((len(opts),3), numpy.float64)
+        self.tvecs = numpy.zeros((len(opts),3), numpy.float64)
         cv2.calibrateCamera(
                    opts, ipts,
                    self.size, self.intrinsics,
-                   self.distortion,
+                   self.distortion, self.rvecs, self.tvecs,
                    flags = self.calib_flags)
+        self.rmats = numpy.zeros((len(opts),3,3), numpy.float64)
+        count = 0
+        for rvec in self.rvecs:
+            #print self.rmats[count]
+            cv2.Rodrigues(rvec, self.rmats[count])
+            count = count + 1
+        #print self.rmats
+        
+
 
         # R is identity matrix for monocular calibration
         self.R = numpy.eye(3, dtype=numpy.float64)
@@ -741,9 +754,10 @@ class MonoCalibrator(Calibrator):
                 # Add sample to database only if it's sufficiently different from any previous sample.
                 params = self.get_parameters(corners, board, (gray.shape[1], gray.shape[0]))
                 if self.is_good_sample(params):
-                    self.db.append((params, gray,msg[1]))
+                    self.db.append((params, gray, msg[1], msg[2]))
                     self.good_corners.append((corners, board))
-                    print(("*** Added sample %d, p_x = %.3f, p_y = %.3f, p_size = %.3f, skew = %.3f, position = [%.3f, %.3f, %.3f]" % tuple([len(self.db)] + params + list(msg[1]))))
+                    print(("*** Added sample %d, p_x = %.3f, p_y = %.3f, p_size = %.3f, skew = %.3f, position = [%.3f, %.3f, %.3f], quaternion = [%.3f, %.3f, %.3f, %.3f]" % tuple([len(self.db)] + params + list(msg[1]) + list(msg[2]))))
+                    #print self.db
 
         rv = MonoDrawable()
         rv.scrib = scrib
@@ -778,7 +792,7 @@ class MonoCalibrator(Calibrator):
             ti.mtime = int(time.time())
             tf.addfile(tarinfo=ti, fileobj=s)
 
-        ims = [("left-%04d.png" % i, im) for i,(_, im) in enumerate(self.db)]
+        ims = [("left-%04d.png" % i, im) for i,(_, im, _, _) in enumerate(self.db)]
         for (name, im) in ims:
             taradd(name, cv2.imencode(".png", im)[1].tostring())
         taradd('ost.yaml', self.yaml())

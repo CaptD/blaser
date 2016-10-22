@@ -123,7 +123,7 @@ class CalibrationNode:
         ts = synchronizer([lsub, rsub], 4)
         ts.registerCallback(self.queue_stereo)
 
-        msub = message_filters.Subscriber('image', sensor_msgs.msg.Image)
+        msub = message_filters.Subscriber('camera_1/image_raw', sensor_msgs.msg.Image)
         msub.registerCallback(self.queue_monocular)
         
         self.set_camera_info_service = rospy.ServiceProxy("%s/set_camera_info" % rospy.remap_name("camera"),
@@ -248,6 +248,13 @@ class OpenCVCalibrationNode(CalibrationNode):
             if self.c.goodenough:
                 if 180 <= y < 280:
                     self.c.do_calibration()
+                    # hand eye calibration here
+                    print 'hand eye calibration'
+                    print self.c.tvecs
+                    print self.c.rmats
+                    print [tvects_b[2] for tvects_b in self.c.db]
+                    print [qvects_b[3] for qvects_b in self.c.db]
+
             if self.c.calibrated:
                 if 280 <= y < 380:
                     self.c.do_save()
@@ -372,7 +379,7 @@ def main():
     zero_tangent_dist = False
     pattern = 'chessboard'
     disable_calib_cb_fast_check = 0
-    service_check = '/camera_1/image_raw'
+    service_check = True
     camera_name = '/camera_1'
 
 
