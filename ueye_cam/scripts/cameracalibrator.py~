@@ -52,6 +52,10 @@ from std_msgs.msg import String
 from std_srvs.srv import Empty
 from tf import TransformListener
 import tf.transformations as transform
+from geometry_msgs.msg import Vector3, Quaternion, Transform, TransformStamped
+
+from visp_hand2eye_calibration.msg import TransformArray
+from visp_hand2eye_calibration.srv import compute_effector_camera_quick
 
 class DisplayThread(threading.Thread):
     """
@@ -118,6 +122,14 @@ class CalibrationNode:
         self._pattern = pattern
         self._camera_name = camera_name
         self.tf = TransformListener()
+
+        # input data
+        self.hand_world_samples = TransformArray()
+        self.camera_marker_samples = TransformArray()
+        # calibration service
+        rospy.wait_for_service('compute_effector_camera_quick')
+        self.calibrate = rospy.ServiceProxy('compute_effector_camera_quick',compute_effector_camera_quick)
+
         lsub = message_filters.Subscriber('left', sensor_msgs.msg.Image)
         rsub = message_filters.Subscriber('right', sensor_msgs.msg.Image)
         ts = synchronizer([lsub, rsub], 4)
@@ -250,10 +262,35 @@ class OpenCVCalibrationNode(CalibrationNode):
                     self.c.do_calibration()
                     # hand eye calibration here
                     print 'hand eye calibration'
-                    print self.c.tvecs
-                    print self.c.rmats
-                    print [tvects_b[2] for tvects_b in self.c.db]
-                    print [qvects_b[3] for qvects_b in self.c.db]
+
+                    self.hand_world_samples.header.frame_id = 'foxbot_tool'
+                    for vects_b in self.c.db:
+                        #print vects_b[2]
+                        trans = (0.1*vects_b[2][0], 0.1*vects_b[2][1], 0.1*vects_b[2][2])
+                        self.hand_world_samples.transforms.append(Transform(Vector3(*trans), Quaternion(*vects_b[3])))
+                    #print self.hand_world_samples.transforms
+                    
+                    self.camera_marker_samples.header.frame_id = 'camera_blue'
+                    for i in range(len(self.c.tvecs)):
+                        iden = numpy.identity(4)
+                        iden[0:3,0:3] = numpy.array(self.c.rmats[i])
+                        quat = transform.quaternion_from_matrix(iden)
+                        for vects_b in self.c.db:
+                            #print vects_b[2]
+                            trans = (0.005*self.c.tvecs[i][0], 0.005*self.c.tvecs[i][1], 0.005*self.c.tvecs[i][2])
+                        self.camera_marker_samples.transforms.append(Transform(Vector3(*trans), Quaternion(*quat)))
+                    #print self.camera_marker_samples.transforms
+        
+                    try:
+                        result = self.calibrate(self.camera_marker_samples, self.hand_world_samples)
+                    except rospy.ServiceException as ex:
+                        rospy.logerr("Calibration failed: "+str(ex))
+                        return None
+                    print result
+                    #print self.c.tvecs
+                    #print self.c.rmats
+                    #print [tvects_b[2] for tvects_b in self.c.db]
+                    #print [qvects_b[3] for qvects_b in self.c.db]
 
             if self.c.calibrated:
                 if 280 <= y < 380:
@@ -369,7 +406,7 @@ class OpenCVCalibrationNode(CalibrationNode):
 
 
 def main():    
-    square = 0.00408 # in meter
+    square = 0.005 # in meter
     width = 9
     height = 6
     approximate = 0.0
@@ -382,10 +419,9 @@ def main():
     service_check = True
     camera_name = '/camera_1'
 
-
     boards = []
     
-    boards.append(ChessboardInfo(width, height, square))
+    boards.append(ChessboardInfo(width, height, square)) # not up to scale
 
     if approximate == 0.0:
         sync = message_filters.TimeSynchronizer
@@ -430,8 +466,7 @@ def main():
         checkerboard_flags = cv2.CALIB_CB_FAST_CHECK
 
     rospy.init_node('cameracalibrator')
-    node = OpenCVCalibrationNode(boards, service_check, sync, calib_flags, pattern, camera_name,
-                                 checkerboard_flags=checkerboard_flags)
+    node = OpenCVCalibrationNode(boards, service_check, sync, calib_flags, pattern, camera_name, checkerboard_flags=checkerboard_flags)
     rospy.spin()
 
 if __name__ == "__main__":

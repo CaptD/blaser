@@ -7,9 +7,8 @@ int main(int argc, char** argv){
   static tf::TransformBroadcaster br;
 
   tf::Transform transform_blaser;
-  transform_blaser.setOrigin( tf::Vector3(-0.3, 0.0, 0.3) );
-  tf::Quaternion q_blaser;
-  q_blaser.setRPY(0, 0, 4.71238898038);
+  transform_blaser.setOrigin(tf::Vector3(-0.3079297, -0.0009062, 0.3244077));
+  tf::Quaternion q_blaser(0.00404,-0.01097,-0.70753,0.70659);
   transform_blaser.setRotation(q_blaser);
 
   tf::Transform transform_nozzle;

@@ -34,7 +34,7 @@ class Blaser:
     rate = 0
     def __init__(self):
 	# node initialized and constants described here
-	with open("/home/jin/boeing/catkin_ws/src/ueye_cam/scripts/red_table_2.txt") as file:
+	with open("/home/jin/boeing/catkin_ws/src/blaser/ueye_cam/scripts/red_table.txt") as file:
 	    Blaser.table_red = [[float(digit) for digit in line.split(' ')] for line in file]
         #with open("blue_table.txt") as file:
     	#    Blaser.table_blue = [[float(digit) for digit in line.split(' ')] for line in file]

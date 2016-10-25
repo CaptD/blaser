@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros
   sensor_msgs
+  visp_hand2eye_calibration
   )
 
 find_package(PCL 1.7 REQUIRED)

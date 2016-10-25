@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="g2_control" type="blaser_scan_red" name="blaser_scan_red" output="screen" />
+  <node pkg="g2_control" type="blaser_scan_blue" name="blaser_scan_blue" output="screen" />
+</launch>

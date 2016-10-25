@@ -19,10 +19,8 @@ import sys, time
 import roslib
 import rospy
 import numpy as np
-#import matplotlib.pyplot as plt
 import std_msgs.msg
 
-#from mpl_toolkits.mplot3d import Axes3D
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import PointCloud
 from geometry_msgs.msg import Point32
@@ -38,7 +36,7 @@ class Blaser:
     #initialized = False
     def __init__(self):
 	# node initialized and constants described here
-        with open("/home/jin/boeing/catkin_ws/src/ueye_cam/scripts/blue_table.txt") as file:
+        with open("/home/jin/boeing/catkin_ws/src/blaser/ueye_cam/scripts/blue_table.txt") as file:
     	    Blaser.table_blue = [[float(digit) for digit in line.split(' ')] for line in file]
 	
 	Blaser.pointcloud_1_pub = rospy.Publisher("/camera_1/PointCloud", PointCloud, queue_size = 5)

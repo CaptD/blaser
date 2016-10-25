@@ -1,0 +1,3 @@
+<launch>
+  <node name="cameracalibrator" pkg="ueye_cam" type="cameracalibrator.py" output="screen"/> 
+</launch>

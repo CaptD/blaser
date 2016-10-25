@@ -34,9 +34,11 @@ target_link_libraries(g2_control ${catkin_LIBRARIES} ${PCL_LIBRARIES} )
 add_executable(g2_control_node src/g2_control_node.cpp)
 target_link_libraries(g2_control_node g2_control  )
 
-add_executable(blaser_scan src/blaser_scan.cpp)
-target_link_libraries(blaser_scan g2_control  )
+add_executable(blaser_scan_red src/blaser_scan_red.cpp)
+target_link_libraries(blaser_scan_red g2_control  )
 
+add_executable(blaser_scan_blue src/blaser_scan_blue.cpp)
+target_link_libraries(blaser_scan_blue g2_control  )
 
 add_executable(edge_follow src/edge_follow.cpp)
 target_link_libraries(edge_follow g2_control  )
