@@ -21,6 +21,7 @@ import rospy
 import numpy as np
 import std_msgs.msg
 
+from matplotlib import pyplot as plt
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import PointCloud
 from geometry_msgs.msg import Point32
@@ -32,6 +33,7 @@ class Blaser:
     pointcloud_1_pub = 0
     #pointcloud_2_pub = 0
     rate = 0
+    edge = 0
     #point_buffer = 0
     #initialized = False
     def __init__(self):
@@ -48,16 +50,114 @@ class Blaser:
 	rospy.Subscriber("/camera_1/image_raw", Image, self.generatePointCloud_blue)
 	rospy.spin()
 
+    def thinning_edge(self):
+        dilated = cv2.dilate(self.mask, np.ones((5, 5)))
+        self.edge = cv2.erode(dilated, np.ones((5, 5)))
+        height, width = self.edge.shape[:2]
+        self.edge[0,:] = 0
+        self.edge[-1,:] = 0
+        self.edge[:,0] = 0
+        self.edge[:,-1] = 0
+        self.edge = self.edge/255
+        #print height, width
+        #print self.edge[334][1279]
+        #print self.edge[333][1279]
+        not_empty = np.sum(self.edge)
+        #print not_empty
+        if not_empty:
+            #pixelpoints = np.array([temp[0],temp[1]])
+            bDone = False
+            count = 0
+            while bDone != True:
+                # first subiteration
+                new_edge = self.edge
+                temp = np.nonzero(new_edge)
+                #print temp
+                
+            	for i in range(0,temp[0].size):
+                    #print "--------------"
+                    #print i
+                    #print temp[0][i]-1
+                    #print temp[1][i]-1
+                    p0 = new_edge[temp[0][i]-1,temp[1][i]-1]
+                    p1 = new_edge[temp[0][i]-1,temp[1][i]]
+                    p2 = new_edge[temp[0][i]-1,temp[1][i]+1]
+                    p3 = new_edge[temp[0][i],temp[1][i]+1]
+                    p4 = new_edge[temp[0][i]+1,temp[1][i]+1]
+                    p5 = new_edge[temp[0][i]+1,temp[1][i]]
+                    p6 = new_edge[temp[0][i]+1,temp[1][i]-1]
+                    p7 = new_edge[temp[0][i],temp[1][i]-1]
+                    c = int(not p1 and (p2 or p3)) + int(not p3 and (p4 or p5)) + int(not p5 and (p6 or p7)) +int(not p7 and (p0 or p1))
+                    #print p1, p2, p3, p4, p5, p6, p7
+                    #print c
+                    if c == 1:
+                        N1 = int(p0 or p1) + int(p2 or p3) + int(p4 or p5) + int(p6 or p7)
+                        N2 = int(p1 or p2) + int(p3 or p4) + int(p5 or p6) + int(p7 or p0)
+                        N = min(N1,N2)
+                        #print N
+                    	if N == 2 or N == 3:
+                            c3 = (p1 or p2 or not p4) and p3
+                            #print c3
+                            if c3 == 0:
+                                new_edge[temp[0][i]][temp[1][i]] = 0
+                # second subiteration
+                temp = np.nonzero(new_edge)
+                for i in range(0,temp[0].size):
+                    p0 = new_edge[temp[0][i]-1,temp[1][i]-1]
+                    p1 = new_edge[temp[0][i]-1,temp[1][i]]
+                    p2 = new_edge[temp[0][i]-1,temp[1][i]+1]
+                    p3 = new_edge[temp[0][i],temp[1][i]+1]
+                    p4 = new_edge[temp[0][i]+1,temp[1][i]+1]
+                    p5 = new_edge[temp[0][i]+1,temp[1][i]]
+                    p6 = new_edge[temp[0][i]+1,temp[1][i]-1]
+                    p7 = new_edge[temp[0][i],temp[1][i]-1]
+                    c = int(not p1 and (p2 or p3)) + int(not p3 and (p4 or p5)) + int(not p5 and (p6 or p7)) +int(not p7 and (p0 or p1))
+                    #print c
+                    if c == 1:
+                        N1 = int(p0 or p1) + int(p2 or p3) + int(p4 or p5) + int(p6 or p7)
+                        N2 = int(p1 or p2) + int(p3 or p4) + int(p5 or p6) + int(p7 or p0)
+                        N = min(N1,N2)
+                        #print N
+                        if N == 2 or N == 3:
+                            E = (p5 or p6 or not p0) and p7
+                            #print E
+                            if E == 0:
+                                new_edge[temp[0][i]][temp[1][i]] = 0
+                # compare
+                edge_diff = np.sum(self.edge - new_edge)
+                #print edge_diff
+                self.edge = new_edge
+                count = count + 1
+                if edge_diff == 0:
+                    bDone = True
+        
+        #print count
+        #self.edge = cv2.GaussianBlur(self.edge,(5,5),3,3)
+        #self.edge = cv2.erode(self.edge, np.array([[0,0,0],[0,1,0],[0,0,0]]))
+        #self.edge = cv2.blur(self.edge,(7,7))
+        #print np.amax(self.edge)
+        """
+        plt.subplot(121),plt.imshow(dilated)
+        plt.title('Original Image'), plt.xticks([]), plt.yticks([])
+        plt.subplot(122),plt.imshow(self.edge)
+        plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
+        plt.show()
+	cv2.waitKey(0)
+        """
+
     def generatePointCloud_blue(self,msg):
 	br = CvBridge()
 	frame = br.imgmsg_to_cv2(msg)
+        #edges = cv2.Canny(frame,280,300)
+        
 	#cv2.imshow("Display window 2",frame) 
 	#cv2.waitKey(0);
     	b,g,r = cv2.split(frame)	
     	lower_red = np.array([0,0,100])
 	upper_red = np.array([100,100,255])
-	mask = cv2.inRange(frame,lower_red,upper_red)
-	temp = np.nonzero(np.transpose(mask))
+	self.mask = cv2.inRange(frame,lower_red,upper_red)
+        self.thinning_edge()
+	temp = np.nonzero(np.transpose(self.edge > 0.3))
 	point_cloud = PointCloud()
 	header = std_msgs.msg.Header()
 	header.stamp = rospy.Time.now()
@@ -65,7 +165,12 @@ class Blaser:
 	point_cloud.header = header
         if temp[0].size:
 	    pixelpoints = np.array([temp[0],temp[1]])
-	    
+            for t in range(0,temp[0].size):
+                ind = temp[0][t]*720+temp[1][t]
+                #print ind
+                point_cloud.points.append(Point32(Blaser.table_blue[ind][0]*10,Blaser.table_blue[ind][1]*10,Blaser.table_blue[ind][2]*10))
+                
+	    """
 	    diff_col = np.nonzero(pixelpoints[0,1:]-pixelpoints[0,0:len(pixelpoints[1])-1])
 	    diff_col = np.array(np.append(diff_col[0]+1,len(pixelpoints[0])))
             
@@ -74,8 +179,10 @@ class Blaser:
 	            temp = np.mean(pixelpoints[:,0:diff_col[t]],axis = 1)
 	        else:
 	            temp = np.mean(pixelpoints[:,diff_col[t-1]:diff_col[t]],axis = 1)
+            
 	        ind = round(temp[0])*720+round(temp[1])
-                point_cloud.points.append(Point32(Blaser.table_blue[int(ind)][0]*10,Blaser.table_blue[int(ind)][1]*10,Blaser.table_blue[int(ind)][2]*10))
+            """
+                
             
 	else:
             rospy.logwarn("no points detected!!!")
