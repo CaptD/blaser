@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="foxbot" type="calibration_dance.py" name="calibration_dance" output="screen" />
+</launch>

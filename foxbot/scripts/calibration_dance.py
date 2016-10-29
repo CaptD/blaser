@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#@package foxbot_node
 import rospy 
 import sys
 import math
@@ -7,6 +9,7 @@ import time
 from foxbot.srv import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
+import select, termios, tty
 
 def setJoints(desired_joint):
     rospy.wait_for_service('/foxbot/robot_SetJoints')
@@ -33,6 +36,13 @@ def getCartesian():
         return [resp1.x,resp1.y,resp1.z,math.degrees(current_pose[0]),math.degrees(current_pose[1]),math.degrees(current_pose[2])]
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
+
+def getKey():
+    tty.setraw(sys.stdin.fileno())
+    select.select([sys.stdin], [], [], 0)
+    key = sys.stdin.read(1)
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+    return key
 
 
 if __name__ == "__main__":
@@ -102,16 +112,19 @@ if __name__ == "__main__":
 [10.130615234375, 63.645833333333336, 76.32180393332331, -34.53908819901316, 66.03841145833334, 18.3708984375],
 [10.642496744791666, 62.900390625000014, 78.04072918278185, -35.518606085526315, 65.42860243055557, 19.273535156250002],
 [11.983642578125, 62.43570963541667, 79.11891219639571, -34.95001541940789, 65.40201822916667, 20.407324218750002],
-[-1.7240397135416667, 57.3583984375, 79.02068789642664, -1.136410361842105, 56.89832899305556, 2.6613281250000003]])
+[-1.7240397135416667, 57.3583984375, 79.02068789642664, -1.136410361842105, 56.89832899305556, 2.6613281250000003],
+[-2.860514322916667, 56.07706705729167, 80.76702457843473, -1.4579050164473686, 56.379665798611114, -1.2823242187500001]])
   
     for i in range(desired_joint.shape[0]):
         setJoints(desired_joint[i])
         time.sleep(0.01)
+    print "turn on laser, then press any key to continue"
+    key = getKey()
 
     desired_joint = np.array([[-2.860514322916667, 56.07706705729167, 80.76702457843473, -1.4579050164473686, 56.379665798611114, -1.2823242187500001],
 [-2.8853352864583335, 58.45418294270834, 81.0186767578128, -1.510716488486842, 53.73101128472222, -1.21376953125],
 [-3.907877604166667, 59.35791015625, 81.0594131922961, -1.8237304687500002, 52.75010850694445, -3.994628906249999]
-])
+]) 
     for i in range(desired_joint.shape[0]):
         setJoints(desired_joint[i])
         time.sleep(0.01)
