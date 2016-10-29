@@ -174,9 +174,10 @@ class CalibrationNode:
             getJoints_client = rospy.ServiceProxy('/foxbot/robot_GetJoints', robot_GetJoints)
             resp1 = getJoints_client()
             joints = [resp1.j1,resp1.j2,resp1.j3,resp1.j4,resp1.j5,resp1.j6]
+            #print joints
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
-        self.q_mono.append((msg,position,quaternion))
+        self.q_mono.append((msg,position,quaternion,joints))
 
     def queue_stereo(self, lmsg, rmsg):
         self.q_stereo.append((lmsg, rmsg))

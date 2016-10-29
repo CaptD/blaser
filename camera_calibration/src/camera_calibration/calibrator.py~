@@ -241,11 +241,6 @@ class Calibrator(object):
         if self.br.encoding_to_dtype_with_channels(msg.encoding)[0] in ['uint16', 'int16']:
             mono16 = self.br.imgmsg_to_cv2(msg, '16UC1')
             mono8 = numpy.array(numpy.clip(mono16, 0, 255), dtype=numpy.uint8)
-            """
-            rgb8 = self.br.imgmsg_to_cv2(msg, 'rgb8')
-            mono8 = rgb8
-            mono8[:,:,2] = mono8[:,:,1]
-            """
             return mono8
         elif 'FC1' in msg.encoding:
             # floating point image handling
@@ -257,8 +252,15 @@ class Calibrator(object):
             else:
                 mono_img = img.astype(numpy.uint8)
             return mono_img
-        else:
-            return self.br.imgmsg_to_cv2(msg, "mono8")
+        else:  
+            #return self.br.imgmsg_to_cv2(msg, "mono8")
+            rgb8 = self.br.imgmsg_to_cv2(msg, 'rgb8')
+            b,g,r = cv2.split(rgb8)
+            mono8 = (g+b)/2
+            #mono8[:,:,2] = mono8[:,:,1]
+            #cv2.imshow("Display window 2",mono8) 
+	    #cv2.waitKey(0);
+            return mono8
 
     def get_parameters(self, corners, board, size):
         """
@@ -364,7 +366,8 @@ class Calibrator(object):
         # Scale the input image down to ~VGA size
         height = img.shape[0]
         width = img.shape[1]
-        scale = math.sqrt( (width*height) / (1280.*720.) )
+        #scale = math.sqrt( (width*height) / (1280.*720.) )
+        scale = math.sqrt( (width*height) / (640.*360.) )
         if scale > 1.0:
             scrib = cv2.resize(img, (int(width / scale), int(height / scale)))
         else:
@@ -731,7 +734,8 @@ class MonoCalibrator(Calibrator):
         #print msg[1]
         gray = self.mkgray(msg[0])
         linear_error = -1
-
+        height = gray.shape[0]
+        width = gray.shape[1]
         # Get display-image-to-be (scrib) and detection of the calibration target
         scrib_mono, corners, downsampled_corners, board, (x_scale, y_scale) = self.downsample_and_detect(gray)
 
@@ -745,7 +749,7 @@ class MonoCalibrator(Calibrator):
 
             #scrib = cv2.cvtColor(gray_rect, cv2.COLOR_GRAY2BGR)
             scrib = self.br.imgmsg_to_cv2(msg[0], "rgb8")
-
+            
             if corners is not None:
                 # Report linear error
                 undistorted = self.undistort_points(corners)
@@ -753,16 +757,17 @@ class MonoCalibrator(Calibrator):
 
                 # Draw rectified corners
                 scrib_src = undistorted.copy()
-                scrib_src[:,:,0] /= x_scale
-                scrib_src[:,:,1] /= y_scale
+                #scrib_src[:,:,0] /= x_scale
+                #scrib_src[:,:,1] /= y_scale
                 cv2.drawChessboardCorners(scrib, (board.n_cols, board.n_rows), scrib_src, True)
 
         else:
             #scrib = cv2.cvtColor(scrib_mono, cv2.COLOR_GRAY2BGR)
             scrib = self.br.imgmsg_to_cv2(msg[0], "rgb8")
+            
             if corners is not None:
                 # Draw (potentially downsampled) corners onto display image
-                cv2.drawChessboardCorners(scrib, (board.n_cols, board.n_rows), downsampled_corners, True)
+                cv2.drawChessboardCorners(scrib, (board.n_cols, board.n_rows), corners, True)
 
                 # Add sample to database only if it's sufficiently different from any previous sample.
                 params = self.get_parameters(corners, board, (gray.shape[1], gray.shape[0]))
@@ -771,6 +776,7 @@ class MonoCalibrator(Calibrator):
                     self.good_corners.append((corners, board))
                     print(("*** Added sample %d, p_x = %.3f, p_y = %.3f, p_size = %.3f, skew = %.3f, position = [%.3f, %.3f, %.3f], quaternion = [%.3f, %.3f, %.3f, %.3f]" % tuple([len(self.db)] + params + list(msg[1]) + list(msg[2]))))
                     #print self.db
+                    print msg[3]
 
         rv = MonoDrawable()
         rv.scrib = scrib

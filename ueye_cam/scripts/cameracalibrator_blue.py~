@@ -53,6 +53,7 @@ from std_srvs.srv import Empty
 from tf import TransformListener
 import tf.transformations as transform
 from geometry_msgs.msg import Vector3, Quaternion, Transform, TransformStamped
+from foxbot.srv import *
 
 from visp_hand2eye_calibration.msg import TransformArray
 from visp_hand2eye_calibration.srv import compute_effector_camera_quick
@@ -122,6 +123,7 @@ class CalibrationNode:
         self._pattern = pattern
         self._camera_name = camera_name
         self.tf = TransformListener()
+        
 
         # input data
         self.hand_world_samples = TransformArray()
@@ -167,6 +169,14 @@ class CalibrationNode:
         if self.tf.frameExists("/foxbot_base") and self.tf.frameExists("/foxbot_tool"):
             t = self.tf.getLatestCommonTime("/foxbot_base", "/foxbot_tool")
             position, quaternion = self.tf.lookupTransform("/foxbot_base", "/foxbot_tool", t)
+        rospy.wait_for_service('/foxbot/robot_GetJoints')
+        try:
+            getJoints_client = rospy.ServiceProxy('/foxbot/robot_GetJoints', robot_GetJoints)
+            resp1 = getJoints_client()
+            joints = [resp1.j1,resp1.j2,resp1.j3,resp1.j4,resp1.j5,resp1.j6]
+            #print joints
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
         self.q_mono.append((msg,position,quaternion))
 
     def queue_stereo(self, lmsg, rmsg):
