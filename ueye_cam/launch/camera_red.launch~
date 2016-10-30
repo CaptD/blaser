@@ -1,7 +1,7 @@
 <launch>
   <arg name="nodelet_manager_name" value="nodelet_manager_red" />
   <arg name="camera_name" value="camera" />
-  <arg name="exposure" value="5" />
+  <arg name="exposure" value="4" />
   <arg name="frame_rate" value="5" />
 
   <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager_name)" args="manager" output="screen" />
@@ -58,5 +58,5 @@
     <param name="flip_upd" type="bool" value="False" />
     <param name="flip_lr"  type="bool" value="False" />
   </node>
-  <!--node pkg="rviz" type="rviz" name="rviz" args="-d $(find ueye_cam)/calib_blue.rviz"/-->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ueye_cam)/calib_blue.rviz"/>
 </launch>

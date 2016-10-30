@@ -43,6 +43,7 @@ private:
     pcl::PointCloud<pcl::PointXYZ> cloud_data;
     Eigen::MatrixXf trajectory;
     tf::StampedTransform transform;
+    int buffer_len;
 };
 
 EdgeFollow::EdgeFollow() {
@@ -51,7 +52,8 @@ EdgeFollow::EdgeFollow() {
     client = nh.serviceClient<foxbot::robot_JogCartesian>("/foxbot/robot_JogCartesian");
     initilaized = false;
     first_frame = true;
-    trajectory = Eigen::MatrixXf::Zero(30,3);
+    buffer_len = 5;
+    trajectory = Eigen::MatrixXf::Zero(buffer_len,3);
 };
 
 char EdgeFollow::getch() {
@@ -209,10 +211,10 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 				}
 				std::cout << "nozzle:" << transform.getOrigin().x() << ", " << transform.getOrigin().y() << ", " << transform.getOrigin().z() << std::endl;
 				std::cout << "blaser:" << cloud_data.points[max_index+3].x << ", " << cloud_data.points[max_index+3].y << ", " << cloud_data.points[max_index+3].z <<std::endl;
-				for (int i = 0; i < 30; i++) {
-					trajectory(i,0) = ((29-i)*transform.getOrigin().x()+(i+1)*cloud_data.points[max_index+3].x)/30.0;
-					trajectory(i,1) = ((29-i)*transform.getOrigin().y()+(i+1)*cloud_data.points[max_index+3].y)/30.0;
-					trajectory(i,2) = ((29-i)*transform.getOrigin().z()+(i+1)*cloud_data.points[max_index+3].z)/30.0;
+				for (int i = 0; i < buffer_len; i++) {
+					trajectory(i,0) = ((buffer_len-1-i)*transform.getOrigin().x()+(i+1)*cloud_data.points[max_index+3].x)/buffer_len;
+					trajectory(i,1) = ((buffer_len-1-i)*transform.getOrigin().y()+(i+1)*cloud_data.points[max_index+3].y)/buffer_len;
+					trajectory(i,2) = ((buffer_len-1-i)*transform.getOrigin().z()+(i+1)*cloud_data.points[max_index+3].z)/buffer_len;
 					
 				}
 				//std::cout << trajectory << std::endl;
@@ -279,13 +281,23 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 			}
 		}
 		foxbot::robot_JogCartesian srv;
-		srv.request.x = trajectory(0, 0) - transform.getOrigin().x();
+		
+        double angle = atan2(trajectory(buffer_len-1, 1)-transform.getOrigin().y(),trajectory(buffer_len-1, 0)-transform.getOrigin().x());
+        std::cout << "angle: " << angle << std::endl;
+       
+        tf::Quaternion quat_end = transform.getRotation();
+        tf::Matrix3x3 m(quat_end);
+        double roll, pitch, yaw;
+        m.getRPY(roll, pitch, yaw);
+        std::cout << "Roll: " << roll << ", Pitch: " << pitch << ", Yaw: " << yaw << std::endl;
+ 		srv.request.x = trajectory(0, 0) - transform.getOrigin().x();
 		srv.request.y = trajectory(0, 1) - transform.getOrigin().y();
 		srv.request.z = 0.0;
 		srv.request.rx = 0.0;
 		srv.request.ry = 0.0;
-		srv.request.rz = 0.0;
-		if (client.call(srv))
+		//srv.request.rz = angle;
+		srv.request.rz = (angle-yaw)*180/3.14159265;
+		if (client.call(srv) && srv.request.rz)
 	    {
 	        ROS_INFO("Succeed calling service");
 	    }
@@ -326,13 +338,13 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 	    pcl::PCLPointCloud2ConstPtr cloud_downsampled_ptr(cloud_downsampled);
 	    pcl::PCLPointCloud2 cloud_bounded;
 	    Eigen::Vector4f minPoint;
-	    minPoint[0] = trajectory(29,0) - 0.04;
-	    minPoint[1] = trajectory(29,1) - 0.03;
-	    minPoint[2] = trajectory(29,2) - 0.03;
+	    minPoint[0] = trajectory(buffer_len-1,0) - 0.04;
+	    minPoint[1] = trajectory(buffer_len-1,1) - 0.03;
+	    minPoint[2] = trajectory(buffer_len-1,2) - 0.03;
 	    Eigen::Vector4f maxPoint;
-	    maxPoint[0] = trajectory(29,0) + 0.04;
-	    maxPoint[1] = trajectory(29,1) + 0.03;
-	    maxPoint[2] = trajectory(29,2) + 0.03;
+	    maxPoint[0] = trajectory(buffer_len-1,0) + 0.04;
+	    maxPoint[1] = trajectory(buffer_len-1,1) + 0.03;
+	    maxPoint[2] = trajectory(buffer_len-1,2) + 0.03;
 	    pcl::CropBox<pcl::PCLPointCloud2> cropFilter;
 	    cropFilter.setInputCloud(cloud_downsampled_ptr);
 	    cropFilter.setMin(minPoint);
@@ -377,19 +389,19 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 
 	    smooth_score.resize(cloud_data.width);
 	    for (int i = 0; i < (cloud_data.width); i++ ) {
-	        smooth_score(i) = -(pow(cloud_data.points[i].x-trajectory(29,0),2.0)+pow(cloud_data.points[i].y-trajectory(29,1),2.0)+5*pow(cloud_data.points[i].z-trajectory(29,2),2.0));
+	        smooth_score(i) = -(pow(cloud_data.points[i].x-trajectory(buffer_len-1,0),2.0)+pow(cloud_data.points[i].y-trajectory(buffer_len-1,1),2.0)+5*pow(cloud_data.points[i].z-trajectory(buffer_len-1,2),2.0));
 	    }
 
 	    smooth_score.maxCoeff(&max_index);
 	    
-	    for (int i = 0; i < 29; i++) {
+	    for (int i = 0; i < buffer_len-1; i++) {
 	    	trajectory(i,0) = trajectory(i+1,0);
 	    	trajectory(i,1) = trajectory(i+1,1);
 	    	trajectory(i,2) = trajectory(i+1,2);
 	    }
-	    trajectory(29,0) = cloud_data.points[max_index].x;
-	    trajectory(29,1) = cloud_data.points[max_index].y;
-	    trajectory(29,2) = cloud_data.points[max_index].z;
+	    trajectory(buffer_len-1,0) = cloud_data.points[max_index].x;
+	    trajectory(buffer_len-1,1) = cloud_data.points[max_index].y;
+	    trajectory(buffer_len-1,2) = cloud_data.points[max_index].z;
 
 	    
 
