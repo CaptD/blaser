@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find ueye_cam)/launch/blaser_red.launch"/> 
   <include file="$(find ueye_cam)/launch/blaser_blue.launch"/> 
-  <include file="$(find g2_control)/launch/all_scan.launch"/> 
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ueye_cam)/blaser.rviz"/>
+  <!--include file="$(find g2_control)/launch/all_scan.launch"/--> 
+  <!--node pkg="rviz" type="rviz" name="rviz" args="-d $(find ueye_cam)/blaser.rviz"/-->
 </launch>

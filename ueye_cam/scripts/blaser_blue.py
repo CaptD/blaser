@@ -156,8 +156,9 @@ class Blaser:
     	lower_red = np.array([0,0,100])
 	upper_red = np.array([100,100,255])
 	self.mask = cv2.inRange(frame,lower_red,upper_red)
-        self.thinning_edge()
-	temp = np.nonzero(np.transpose(self.edge > 0.3))
+        #self.thinning_edge()
+	#temp = np.nonzero(np.transpose(self.edge > 0.3))
+        temp = np.nonzero(np.transpose(self.mask))
 	point_cloud = PointCloud()
 	header = std_msgs.msg.Header()
 	header.stamp = rospy.Time.now()
@@ -165,7 +166,9 @@ class Blaser:
 	point_cloud.header = header
         if temp[0].size:
 	    pixelpoints = np.array([temp[0],temp[1]])
+            """
             for t in range(0,temp[0].size):
+
                 ind = temp[0][t]*720+temp[1][t]
                 #print ind
                 point_cloud.points.append(Point32(Blaser.table_blue[ind][0]*10,Blaser.table_blue[ind][1]*10,Blaser.table_blue[ind][2]*10))
@@ -180,8 +183,8 @@ class Blaser:
 	        else:
 	            temp = np.mean(pixelpoints[:,diff_col[t-1]:diff_col[t]],axis = 1)
             
-	        ind = round(temp[0])*720+round(temp[1])
-            """
+	        ind = int(round(temp[0])*720+round(temp[1]))
+                point_cloud.points.append(Point32(Blaser.table_blue[ind][0]*10-0.03,Blaser.table_blue[ind][1]*10,Blaser.table_blue[ind][2]*10-0.05))
                 
             
 	else:
