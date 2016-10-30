@@ -11,7 +11,6 @@ rosrun visp_hand2eye_calibration visp_hand2eye_calibration_calibrator
 roslaunch ueye_cam camera_blue.launch 
 roslaunch ueye_cam calibration_blue.launch 
 ```
-
 2. edge follow:
 ```
 roslaunch foxbot foxbot.launch
