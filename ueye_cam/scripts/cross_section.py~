@@ -15,29 +15,34 @@ from geometry_msgs.msg import Point32
 from tf import TransformListener
 
 
-class Blaser:
+class CrossSection:
     def __init__(self):
 	# node initialized and constants described here
 	rospy.init_node('cross_section_plotter', anonymous=True)
-	self.rate = rospy.Rate(100) # 10hz
+	#self.rate = rospy.Rate(100) # 10hz
         self.tf = TransformListener()
-        rospy.Subscriber("/camera_1/PointCloud", PointCloud, self.updatePointCloud)
-	rospy.Subscriber("/camera_2/allScan", PointCloud2, self.showCrossSection)
+        rospy.Subscriber("/camera_1/PointCloud", PointCloud, self.showCrossSection)
+	#rospy.Subscriber("/camera_2/allScan", PointCloud2, self.updatePointCloud)
         rospy.spin()
 
+    """
     def updatePointCloud(self,msg):
         if self.tf.frameExists("/foxbot_base") and self.tf.frameExists("/blaser"):
             #t = self.tf.getLatestCommonTime("/foxbot_base", "/blaser")
             cloud = self.tf.transformPointCloud("/foxbot_base",msg)
             self.gen = pc2.read_points(cloud, skip_nans=True, field_names=("x", "y", "z"))
             print self.gen
+    """
             
 
     def showCrossSection(self,msg):
         if self.tf.frameExists("/foxbot_base") and self.tf.frameExists("/blaser"):
             #t = self.tf.getLatestCommonTime("/foxbot_base", "/blaser")
+            now = msg.header.stamp
+            self.tf.waitForTransform("/foxbot_base","/blaser",now,rospy.Duration(5.0))
             pointCloud = self.tf.transformPointCloud("/foxbot_base",msg)
-            size = msg.points.size()
+            size = len(msg.points)
+            print "size = ", size
             points = np.zeros((3,size))
             for i in range(size):
                 points[0,i] = msg.points[i].x
@@ -45,9 +50,10 @@ class Blaser:
                 points[2,i] = msg.points[i].z
             self.y = np.mean(points[1])
             plt.plot(points[0],points[2],'ro')
-            plt.plot(self.gen[0],self.gen[3],'bo')
+            plt.show()
+            #plt.plot(self.gen[0],self.gen[3],'bo')
 
-	self.rate.sleep()
+	#self.rate.sleep()
 
 if __name__ == '__main__':
     try:

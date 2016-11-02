@@ -17,7 +17,7 @@ int main(int argc, char** argv){
   q_nozzle.setRPY(0, 0, 0);
   transform_nozzle.setRotation(q_nozzle);
 
-  ros::Rate rate(30);
+  ros::Rate rate(100);
   while(node.ok()) {
     br.sendTransform(tf::StampedTransform(transform_blaser, ros::Time::now(), "foxbot_tool", "blaser"));
     br.sendTransform(tf::StampedTransform(transform_nozzle, ros::Time::now(), "foxbot_tool", "nozzle"));
