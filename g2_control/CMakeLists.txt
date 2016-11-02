@@ -43,6 +43,9 @@ target_link_libraries(blaser_scan_blue g2_control  )
 add_executable(edge_follow src/edge_follow.cpp)
 target_link_libraries(edge_follow g2_control  )
 
+add_executable(cross_section src/cross_section.cpp)
+target_link_libraries(cross_section g2_control  )
+
 install(DIRECTORY config
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 

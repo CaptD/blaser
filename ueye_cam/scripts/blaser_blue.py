@@ -43,7 +43,7 @@ class Blaser:
 	
 	Blaser.pointcloud_1_pub = rospy.Publisher("/camera_1/PointCloud", PointCloud, queue_size = 5)
 	rospy.init_node('blaser_blue_pub', anonymous=True)
-	Blaser.rate = rospy.Rate(10) # 10hz
+	Blaser.rate = rospy.Rate(100) # 100hz
         #Blaser.point_buffer = np.array([])
 	
     def subscribe_image(self):
@@ -184,7 +184,7 @@ class Blaser:
 	            temp = np.mean(pixelpoints[:,diff_col[t-1]:diff_col[t]],axis = 1)
             
 	        ind = int(round(temp[0])*720+round(temp[1]))
-                point_cloud.points.append(Point32(Blaser.table_blue[ind][0]*10-0.03,Blaser.table_blue[ind][1]*10,Blaser.table_blue[ind][2]*10-0.05))
+                point_cloud.points.append(Point32(Blaser.table_blue[ind][0]*10-0.01,Blaser.table_blue[ind][1]*10,Blaser.table_blue[ind][2]*10-0.08))
                 
             
 	else:

@@ -297,6 +297,7 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 		srv.request.ry = 0.0;
 		//srv.request.rz = angle;
 		srv.request.rz = (angle-yaw)*180/3.14159265;
+		srv.request.rz = std::max(std::min(srv.request.rz,1.0),-1.0);
 		if (client.call(srv) && srv.request.rz)
 	    {
 	        ROS_INFO("Succeed calling service");
@@ -332,7 +333,7 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 	    // Perform the actual filtering
 	    pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
 	    sor.setInputCloud (cloudPtr);
-	    sor.setLeafSize (0.01, 0.01, 0.01);
+	    sor.setLeafSize (0.001, 0.001, 0.001);
 	    sor.filter (*cloud_downsampled);
 
 	    pcl::PCLPointCloud2ConstPtr cloud_downsampled_ptr(cloud_downsampled);
@@ -386,14 +387,24 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 	    smooth_score.maxCoeff(&max_index);
 
 	    */
-
+        
+        /* nearest neighbor
 	    smooth_score.resize(cloud_data.width);
 	    for (int i = 0; i < (cloud_data.width); i++ ) {
 	        smooth_score(i) = -(pow(cloud_data.points[i].x-trajectory(buffer_len-1,0),2.0)+pow(cloud_data.points[i].y-trajectory(buffer_len-1,1),2.0)+5*pow(cloud_data.points[i].z-trajectory(buffer_len-1,2),2.0));
 	    }
+	    */
+	    smooth_score.resize(cloud_data.width-10);
+	    for (int i = 0; i < (cloud_data.width-10); i++ ) {
+	    	if (cloud_data.points[i+10].z-cloud_data.points[i].z > 0.01) {
+               smooth_score(i) = -(pow(cloud_data.points[i].x-trajectory(buffer_len-1,0),2.0)+pow(cloud_data.points[i].y-trajectory(buffer_len-1,1),2.0)+5*pow(cloud_data.points[i].z-trajectory(buffer_len-1,2),2.0));
+	    	} else {
+	    		smooth_score(i) = -1.0;
+	    	}
+	        
+	    }
 
 	    smooth_score.maxCoeff(&max_index);
-	    
 	    for (int i = 0; i < buffer_len-1; i++) {
 	    	trajectory(i,0) = trajectory(i+1,0);
 	    	trajectory(i,1) = trajectory(i+1,1);
