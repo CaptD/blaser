@@ -43,7 +43,7 @@ class Blaser:
 	
 	Blaser.pointcloud_1_pub = rospy.Publisher("/camera_1/PointCloud", PointCloud, queue_size = 5)
 	rospy.init_node('blaser_blue_pub', anonymous=True)
-	Blaser.rate = rospy.Rate(10) # 10hz
+	Blaser.rate = rospy.Rate(100) # 100hz
         #Blaser.point_buffer = np.array([])
 	
     def subscribe_image(self):

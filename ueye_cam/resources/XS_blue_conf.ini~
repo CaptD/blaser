@@ -56,7 +56,7 @@ Manual gain=0
 [Timing]
 Pixelclock=30
 Extended pixelclock range=0
-Framerate=14.995989
+Framerate=30
 Exposure=10.014167
 Long exposure=0
 Dual exposure ratio=0
@@ -209,7 +209,7 @@ GPIO2 Config=0
 
 
 [Lens Focus]
-Focus manual value=10
+Focus manual value=100
 Focus AF enable=0
 Focus AF use FDT AOI=0
 Focus AF zone preset=0

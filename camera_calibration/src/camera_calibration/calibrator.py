@@ -318,8 +318,8 @@ class Calibrator(object):
         progress = [min((hi - lo) / r, 1.0) for (lo, hi, r) in zip(min_params, max_params, self.param_ranges)]
         # If we have lots of samples, allow calibration even if not all parameters are green
         # TODO Awkward that we update self.goodenough instead of returning it
-        #self.goodenough = (len(self.db) >= 40) or all([p == 1.0 for p in progress])
-        self.goodenough = (len(self.db) >= 2) or all([p == 1.0 for p in progress])
+        self.goodenough = (len(self.db) >= 40) or all([p == 1.0 for p in progress])
+        #self.goodenough = (len(self.db) >= 2) or all([p == 1.0 for p in progress])
         return list(zip(self._param_names, min_params, max_params, progress))
 
     def mk_object_points(self, boards, use_board_size = False):
@@ -601,8 +601,8 @@ class MonoCalibrator(Calibrator):
         #print len(opts)
         self.rvecs = numpy.zeros((len(opts),3), numpy.float64)
         self.tvecs = numpy.zeros((len(opts),3), numpy.float64)
-        print 'opts'
-        print opts
+        #print 'opts'
+        #print opts
         #print 'ipts'
         #print ipts
         cv2.calibrateCamera(
@@ -778,7 +778,7 @@ class MonoCalibrator(Calibrator):
                     self.good_corners.append((corners, board))
                     print(("*** Added sample %d, p_x = %.3f, p_y = %.3f, p_size = %.3f, skew = %.3f, position = [%.3f, %.3f, %.3f], quaternion = [%.3f, %.3f, %.3f, %.3f]" % tuple([len(self.db)] + params + list(msg[1]) + list(msg[2]))))
                     #print self.db
-                    print msg[3]
+                    print "Joint angle:", msg[3]
 
         rv = MonoDrawable()
         rv.scrib = scrib

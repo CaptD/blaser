@@ -1,6 +1,5 @@
 <launch>
-  <include file="$(find ueye_cam)/launch/camera_red.launch"/> 
+  <!--include file="$(find ueye_cam)/launch/camera_red.launch"/--> 
   <node pkg="ueye_cam" type="blaser_red.py" name="blaser_red" output="screen" />
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ueye_cam)/blaser.rviz"/>
-  <node name="tf_bc" pkg="ueye_cam" type="tfbc"/>
+  <!--node name="tf_bc" pkg="ueye_cam" type="tfbc"/-->
 </launch>
