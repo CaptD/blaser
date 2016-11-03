@@ -85,9 +85,9 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 			//const std::string& target_frame = "base";
 			//ros::Time t = ros::Time(0);
 			try{
-			  tf_listener.waitForTransform("blaser", "foxbot_base", ros::Time::now(), ros::Duration(2.0));
+			  tf_listener.waitForTransform("blaser", "foxbot_base", mcurrScan->header.stamp, ros::Duration(2.0));
 		      //tf_listener.waitForTransform("blaser", "base", ros::Time::now(), ros::Duration(1.0));
-		      tf_listener.transformPointCloud(target_frame, ros::Time(0), *mcurrScan, target_frame, currScan);  
+		      tf_listener.transformPointCloud(target_frame, mcurrScan->header.stamp, *mcurrScan, target_frame, currScan);  
 		    }
 		    catch (tf::TransformException &ex) {
 		      ROS_ERROR("%s",ex.what());
@@ -201,7 +201,7 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 				while(!succeed) {
 					succeed = true;
 					try{
-						tf_listener.lookupTransform("/foxbot_base", "/nozzle", ros::Time(0), transform);
+						tf_listener.lookupTransform("/foxbot_base", "/nozzle", mcurrScan->header.stamp, transform);
 						//std::cout << transform.getOrigin().x() << std::endl;
 					}
 					catch (tf::TransformException ex){
@@ -311,9 +311,9 @@ void EdgeFollow::extractEdge(const sensor_msgs::PointCloud::ConstPtr& mcurrScan)
 		//const std::string& target_frame = "base";
 		//ros::Time t = ros::Time(0);
 		try{
-		  tf_listener.waitForTransform("blaser", "foxbot_base", ros::Time::now(), ros::Duration(2.0));
+		  tf_listener.waitForTransform("blaser", "foxbot_base", mcurrScan->header.stamp, ros::Duration(2.0));
 	      //tf_listener.waitForTransform("blaser", "base", ros::Time::now(), ros::Duration(1.0));
-	      tf_listener.transformPointCloud(target_frame, ros::Time(0), *mcurrScan, target_frame, currScan);  
+	      tf_listener.transformPointCloud(target_frame, mcurrScan->header.stamp, *mcurrScan, target_frame, currScan);  
 	    }
 	    catch (tf::TransformException &ex) {
 	      ROS_ERROR("%s",ex.what());

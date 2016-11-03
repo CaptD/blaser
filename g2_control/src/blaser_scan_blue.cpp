@@ -71,9 +71,9 @@ void BlaserScan::updatePointCloud(const sensor_msgs::PointCloud::ConstPtr& mcurr
 	//const std::string& target_frame = "base";
 	//ros::Time t = ros::Time(0);
 	try{
-	  tf_listener.waitForTransform("blaser", "foxbot_base", ros::Time::now(), ros::Duration(1.0));
+	  tf_listener.waitForTransform("blaser", "foxbot_base", mcurrScan->header.stamp, ros::Duration(2.0));
       //tf_listener.waitForTransform("blaser", "base", ros::Time::now(), ros::Duration(1.0));
-      tf_listener.transformPointCloud(target_frame, ros::Time(0), *mcurrScan, target_frame, currScan);
+      tf_listener.transformPointCloud(target_frame, mcurrScan->header.stamp, *mcurrScan, target_frame, currScan);
       
     }
     catch (tf::TransformException &ex) {
