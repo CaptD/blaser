@@ -68,8 +68,6 @@ class CrossSection:
             plt.show()
             #plt.plot(self.gen[0],self.gen[3],'bo')
 
-	self.rate.sleep()
-
 if __name__ == '__main__':
     try:
         cs = CrossSection()
