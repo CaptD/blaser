@@ -36,6 +36,7 @@ class Blaser:
 	# node initialized and constants described here
 	with open("/home/jin/boeing/catkin_ws/src/blaser/ueye_cam/scripts/red_table.txt") as file:
 	    Blaser.table_red = [[float(digit) for digit in line.split(' ')] for line in file]
+        Blaser.table_red = np.around(Blaser.table_red,decimals = 4)
         #with open("blue_table.txt") as file:
     	#    Blaser.table_blue = [[float(digit) for digit in line.split(' ')] for line in file]
 	
