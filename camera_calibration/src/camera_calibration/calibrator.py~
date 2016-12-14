@@ -734,6 +734,7 @@ class MonoCalibrator(Calibrator):
         Returns a MonoDrawable message with the display image and progress info.
         """
         #print msg[1]
+        #gray = self.mkgray(msg[0])
         gray = self.mkgray(msg[0])
         linear_error = -1
         height = gray.shape[0]
